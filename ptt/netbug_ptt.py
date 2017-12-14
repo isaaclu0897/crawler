@@ -61,3 +61,4 @@ while count<=page_number:
                     print('{} can not download {}'.format(name, page))
     print('{} finish'.format(name))
 print('程式共花費:{:f}秒'.format(time.time() - start))
+
