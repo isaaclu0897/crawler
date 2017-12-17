@@ -14,7 +14,7 @@ class change_page():
     
     說明: 抽取 url 的 index 置換成下個頁面的 index
     '''
-    def index(url, index):
+    def index(url, index, printu=True):
         ''' 索引換頁
         
         換到第2312頁
@@ -28,9 +28,10 @@ class change_page():
         url = url.split('/')
         url[-1] = ('index{}.html'.format(index))
         url = '/'.join(url)
-        print(url)
+        if printu:
+            print(url)
         return url
-    def page(url, jump_page=1):
+    def page(url, jump_page=1, printu=True):
         ''' 頁數換頁
        
         換1頁
@@ -56,7 +57,8 @@ class change_page():
         url = url.split('/')
         url[-1] = ('index{}.html'.format(index))
         url = '/'.join(url)
-        print(url)
+        if printu:
+            print(url)
         return url
     
 def parse_url(url, specific=False, href=None):
@@ -123,23 +125,38 @@ def mk_exclusivedir(path, dirname):
 class ptt():
     ''' ptt特定函數
     '''
-    def deal_likenum(obj):
+    def DW_pushnum(obj):
         ''' ptt推文數處裡
         
         說明: ptt 推文數會有文字"爆"及"空", 需要處理掉才能過濾讚數
         '''
         try:
-            likenum = int(obj)
+            pushnum = int(obj)
         except:
             if obj == '爆':
-                likenum = 99
+                pushnum = 99
             elif obj == '':
-                likenum = -10
+                pushnum = -10
             elif obj == 'X1':
-                likenum = -200
+                pushnum = -200
             else:
-                likenum = 0
-        return likenum
+                pushnum = 0
+        return pushnum
     
+class PTT_atc():
+    def name(block):
+        return block.select('a')[0].text 
+        
+    def url(block):
+        return block.select('a')[0]['href']
+        
+    def date(block):
+        return block.select('.date')[0].text
+        
+    def author(block):
+        return block.select('.author')[0].text
     
+    def push_num(block):
+        return block.select('.nrec')[0].text
+
 
