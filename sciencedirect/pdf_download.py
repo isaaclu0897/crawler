@@ -12,25 +12,42 @@ from bs4 import BeautifulSoup
 
 
 
+
 def download(filename, src_url):
     try:
         src_res = requests.get(src_url, stream=True)
         soup = BeautifulSoup(src_res.text, "lxml")
         paper_url = soup.body.div.p.a['href']
         
-        print(paper_url)
+        print('start', filename)
         paper_res = requests.get(paper_url, stream=True)
         filename = filename
         with open(filename, 'wb') as f:
             f.write(paper_res.content)
-        print("{} Completed".format(filename))
+        print('Completed', filename)
     except Exception as e:
         print(e.message, e.args)
         return (filename, src_url)
     return None
 
+def index_date(attr):
+    if '2017,' in attr:
+        date = '2017_'
+    elif '2016,' in attr:
+        date = '2016_'
+    elif '2015,' in attr:
+        date = '2015_'
+    elif '2018,' in attr:
+        date = '2018_'
+    else:
+        date = 'unknow_'
+    return date
+
 
 if __name__=='__main__':
+    import gevent
+    from gevent import monkey;
+    monkey.patch_all()
     file_dir = '/home/wei/good/'
     os.chdir(file_dir)
     print(os.getcwd())
@@ -48,13 +65,15 @@ if __name__=='__main__':
     titles = []
     for paper_block in paper_blocks:
         title = paper_block.select('h2 a')[0].text
-        attr = paper_block.select('ol[class="SubType hor"]')[0].text
-        date = attr.split(',')[2]
-        date_year = date.split()[1]
+        attr = set(paper_block.select('ol[class="SubType hor"]')[0].text.split(' '))
+        date_year = index_date(attr)
+        filename = date_year + title
         src_url_index = paper_block.select('li[class="DownloadPdf download-link-item"]')[0].a['href']
         src_url = src_url_root + src_url_index
-        err = download(title, src_url)
-        fail.append(err)
+        task = [gevent.spawn(download, filename, src_url)]
+#        if err != None:
+#            fail.append(err)
+    result = gevent.joinall(task)
     print(fail)
 
 
